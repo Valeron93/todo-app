@@ -37,6 +37,8 @@ func main() {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 
+	r.Use(authController.InjectSessionMiddleware)
+
 	r.HandleFunc("/register", authController.HandleRegister)
 	r.HandleFunc("/login", authController.HandleLogin)
 	r.Handle("/static/*", view.StaticHandler)

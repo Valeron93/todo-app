@@ -24,20 +24,29 @@ func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
 
 func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		sessionCookie, err := r.Cookie("session_token")
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-		user, err := c.sessions.GetUser(sessionCookie.Value)
-		if err != nil {
+
+		_, ok := r.Context().Value("user").(model.User)
+
+		if !ok {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		next.ServeHTTP(w, r.WithContext(
-			context.WithValue(r.Context(), "user", user),
-		))
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (c *AuthController) InjectSessionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		if sessionCookie, err := r.Cookie("session_token"); err == nil {
+			if user, err := c.sessions.GetUser(sessionCookie.Value); err == nil {
+				ctx = context.WithValue(r.Context(), "user", user)
+			}
+		}
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
