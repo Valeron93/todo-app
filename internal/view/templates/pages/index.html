@@ -1,16 +1,20 @@
-{{ define "title" }}
-    Todo App in Go
-{{ end }}
+{{ define "title" }}Todo App in Go{{ end }}
 
 {{ define "body" }}
-    <p>Logged in as {{ .User.Username }}</p>
-    <form action="/logout" method="post">
-        <input type="submit" value="Logout">
-    </form>
-    {{ template "todo-form" . }}
-    <div id="todo-list">
-        {{ range .Todos }}
-            {{ template "todo-item" . }}
-        {{ end }}
-    </div>
+    <section class="card">
+        <div class="header">
+            <p class="user">Logged in as {{ .User.Username }}</p>
+            <form action="/logout" method="post">
+                <input type="submit" value="Logout">
+            </form>
+        </div>
+
+        {{ template "todo-form" . }}
+
+        <div id="todo-list" class="todo-list">
+            {{ range .Todos }}
+                {{ template "todo-item" . }}
+            {{ end }}
+        </div>
+    </section>
 {{ end }}

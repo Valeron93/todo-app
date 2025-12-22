@@ -12,7 +12,7 @@ tmp_dir = "tmp"
   entrypoint = ["./tmp/todo"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   include_dir = ["cmd", "internal"]
-  include_ext = ["go", "tpl", "tmpl", "html"]
+  include_ext = ["go", "tpl", "tmpl", "html", "css"]
 
 [log]
   main_only = true

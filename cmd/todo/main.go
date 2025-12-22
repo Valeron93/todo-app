@@ -9,6 +9,7 @@ import (
 	"github.com/Valeron93/todo-app/internal/controllers/todo"
 	"github.com/Valeron93/todo-app/internal/migrations"
 	"github.com/Valeron93/todo-app/internal/model"
+	"github.com/Valeron93/todo-app/internal/view"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/mattn/go-sqlite3"
@@ -38,7 +39,7 @@ func main() {
 
 	r.HandleFunc("/register", authController.HandleRegister)
 	r.HandleFunc("/login", authController.HandleLogin)
-
+	r.Handle("/static/*", view.StaticHandler)
 	// protected endpoints
 	r.Group(func(r chi.Router) {
 		r.Use(authController.AuthMiddleware)
