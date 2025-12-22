@@ -44,7 +44,7 @@ func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
 func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
-		if err := view.Templates.ExecuteTemplate(w, "register", nil); err != nil {
+		if err := view.RenderPage(w, "register", nil); err != nil {
 			log.Print(err)
 		}
 		return
@@ -95,7 +95,7 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
-		if err := view.Templates.ExecuteTemplate(w, "login", nil); err != nil {
+		if err := view.RenderPage(w, "login", nil); err != nil {
 			log.Print(err)
 		}
 		return

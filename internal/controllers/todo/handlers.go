@@ -24,7 +24,7 @@ func (a *TodoController) HandleIndex(w http.ResponseWriter, r *http.Request) {
 		User:  user,
 	}
 
-	if err := view.Templates.ExecuteTemplate(w, "index", data); err != nil {
+	if err := view.RenderPage(w, "index", data); err != nil {
 		log.Print(err)
 	}
 }
@@ -51,7 +51,7 @@ func (a *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) 
 		log.Print(err)
 		return
 	}
-	if err := view.Templates.ExecuteTemplate(w, "todo-item", todo); err != nil {
+	if err := view.RenderPartial(w, "todo-item", todo); err != nil {
 		log.Print(err)
 	}
 

@@ -1,0 +1,11 @@
+{{ define "title" }}
+    Register
+{{ end }}
+
+{{ define "body" }}
+    <form action="/register" method="post">
+        <input type="text" name="username" required>
+        <input type="text" name="password" required>
+        <input type="submit">
+    </form>
+{{end}}
