@@ -44,7 +44,7 @@ func init() {
 
 }
 
-func RenderPage(w http.ResponseWriter, page string, data any) error {
+func renderPage(w http.ResponseWriter, page string, data any) error {
 
 	t, ok := pagesTemplates[page]
 	if !ok {

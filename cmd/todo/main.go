@@ -30,6 +30,7 @@ func main() {
 	todoRepo := model.NewTodoRepoSql(db)
 	authController := auth.New(model.NewUserRepoSql(db), model.NewSessionManagerSql(db))
 	todoController := todo.New(todoRepo)
+	views := view.NewViewHandler(todoRepo)
 
 	r := chi.NewRouter()
 
@@ -39,17 +40,27 @@ func main() {
 
 	r.Use(authController.InjectSessionMiddleware)
 
-	r.HandleFunc("/register", authController.HandleRegister)
-	r.HandleFunc("/login", authController.HandleLogin)
+	r.Post("/api/register", authController.HandleRegister)
+	r.Post("/api/login", authController.HandleLogin)
+
+	r.Get("/register", views.HandleRegisterPage)
+	r.Get("/login", views.HandleLoginPage)
+
 	r.Handle("/static/*", view.StaticHandler)
-	// protected endpoints
+
+	// protected pages
+	r.Group(func(r chi.Router) {
+		r.Use(authController.AuthRedirectMiddleware)
+		r.Get("/", views.HandleIndexPage)
+	})
+
+	// protected API endpoints
 	r.Group(func(r chi.Router) {
 		r.Use(authController.AuthMiddleware)
 
-		r.Get("/", todoController.HandleIndex)
 		r.Post("/api/todo", todoController.HandlePostTodo)
 		r.Delete("/api/todo/{id}", todoController.HandleDeleteTodo)
-		r.Post("/logout", authController.HandleLogout)
+		r.Post("/api/logout", authController.HandleLogout)
 	})
 
 	const addr = ":3000"

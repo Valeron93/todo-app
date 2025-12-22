@@ -7,27 +7,8 @@ import (
 	"strings"
 
 	"github.com/Valeron93/todo-app/internal/model"
-	view "github.com/Valeron93/todo-app/internal/view"
+	"github.com/Valeron93/todo-app/internal/view"
 )
-
-func (a *TodoController) HandleIndex(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(model.User)
-	todos, err := a.todoRepo.GetAllForUser(user.Id)
-
-	if err != nil {
-		http.Error(w, "database error", http.StatusInternalServerError)
-		return
-	}
-
-	data := IndexTemplateData{
-		Todos: todos,
-		User:  user,
-	}
-
-	if err := view.RenderPage(w, "index", data); err != nil {
-		log.Print(err)
-	}
-}
 
 func (a *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) {
 

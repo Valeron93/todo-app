@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/Valeron93/todo-app/internal/model"
-	"github.com/Valeron93/todo-app/internal/view"
 )
 
 type AuthController struct {
@@ -23,6 +22,20 @@ func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
 }
 
 func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		_, ok := r.Context().Value("user").(model.User)
+
+		if !ok {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (c *AuthController) AuthRedirectMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		_, ok := r.Context().Value("user").(model.User)
@@ -51,19 +64,6 @@ func (c *AuthController) InjectSessionMiddleware(next http.Handler) http.Handler
 }
 
 func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method == "GET" {
-		if err := view.RenderPage(w, "register", nil); err != nil {
-			log.Print(err)
-		}
-		return
-	}
-
-	if r.Method != "POST" {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
@@ -103,17 +103,6 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 
 func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "GET" {
-		if err := view.RenderPage(w, "login", nil); err != nil {
-			log.Print(err)
-		}
-		return
-	}
-
-	if r.Method != "POST" {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad form data", http.StatusBadRequest)
 		return
@@ -148,7 +137,7 @@ func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Add("HX-Redirect", "/")
 }
 
 func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {

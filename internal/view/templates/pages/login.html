@@ -1,12 +1,12 @@
 {{ define "title" }}Login{{ end }}
 
 {{ define "body" }}
-    <section class="card auth">
-        <form class="form" action="/login" method="post">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <input type="submit" value="Login">
-        </form>
-        <a class="link" href="/register">Don't have an account? Register</a>
+<section class="card auth">
+    <form class="form" hx-post="/api/login">
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <input type="submit" value="Login">
+    </form>
+    <a class="link" href="/register">Don't have an account? Register</a>
     </section>
 {{ end }}
