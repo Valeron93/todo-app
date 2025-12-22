@@ -1,0 +1,20 @@
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(64) UNIQUE NOT NULL,
+    hashed_password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE todos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE sessions (
+    token VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL,
+    user_id INTEGER NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

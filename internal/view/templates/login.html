@@ -1,0 +1,20 @@
+{{ define "login" }}
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login</title>
+    </head>
+    <body>
+        <form action="/login" method="post">
+            <input type="text" name="username" required>
+            <input type="text" name="password" required>
+            <input type="submit">
+        </form>
+        <a href="/register">Don't have an account? Register</a>
+    </body>
+    </html>
+
+{{ end }}

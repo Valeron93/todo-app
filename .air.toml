@@ -1,0 +1,21 @@
+#:schema https://json.schemastore.org/any.json
+
+root = "."
+testdata_dir = "testdata"
+tmp_dir = "tmp"
+
+[build]
+  args_bin = []
+  bin = "./tmp/todo"
+  cmd = "go build -o ./tmp/todo ./cmd/todo"
+  delay = 50
+  entrypoint = ["./tmp/todo"]
+  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  include_dir = ["cmd", "internal"]
+  include_ext = ["go", "tpl", "tmpl", "html"]
+
+[log]
+  main_only = true
+
+[misc]
+  clean_on_exit = false

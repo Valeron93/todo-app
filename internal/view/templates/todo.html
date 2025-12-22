@@ -1,0 +1,22 @@
+{{ define "todo-item" }}
+    <div class="todo-item">
+        <h2> - {{ .Action }}</h2>
+        <button
+        hx-delete="/api/todo/{{ .Id }}"
+        hx-target="closest .todo-item"
+        hx-swap="outerHTML">
+            Delete
+        </button>
+    </div>
+{{ end }}
+
+{{ define "todo-form" }}
+    <form 
+        hx-post="/api/todo" 
+        hx-target="#todo-list" 
+        hx-swap="beforeend"
+        hx-on::after-request="if (event.detail.successful) this.reset()">
+        <input type="text" name="todo-action" placeholder="enter your todo" required>
+        <input type="submit" value="Add"></input>
+    </form>
+{{ end }}
