@@ -1,0 +1,41 @@
+package templates
+
+type AuthFormData struct {
+	Username        string
+	Password        string
+	ConfirmPassword string
+	Error           string
+}
+
+templ Login() {
+	@layout("Login", LoginForm(AuthFormData{}))
+}
+
+templ Register() {
+	@layout("Register", RegisterForm(AuthFormData{}))
+}
+
+templ RegisterForm(data AuthFormData) {
+	<section class="card auth">
+		<form class="form" hx-post="/api/register" hx-target="closest section" hx-swap="outerHTML">
+			<input type="text" name="username" placeholder="Username" value={ data.Username } required/>
+			<input type="password" name="password" placeholder="Password" value={ data.Password } required/>
+			<input type="password" name="confirmPassword" placeholder="Confirm password" value={ data.ConfirmPassword } required/>
+			<input type="submit" value="Register"/>
+			<a class="link" hx-boost="true" hx-target="body" hx-swap="innerHTML" href="/login">Login...</a>
+			<div class="error-container1">{ data.Error }</div>
+		</form>
+	</section>
+}
+
+templ LoginForm(data AuthFormData) {
+	<section class="card auth">
+		<form class="form" hx-post="/api/login" hx-target="closest section" hx-swap="outerHTML">
+			<input type="text" name="username" placeholder="Username" value={ data.Username } required/>
+			<input type="password" name="password" placeholder="Password" value={ data.Password } required/>
+			<input type="submit" value="Login"/>
+			<a class="link" hx-boost="true" hx-target="body" href="/register" hx-swap="innerHTML">Register...</a>
+			<div class="error-container">{ data.Error }</div>
+		</form>
+	</section>
+}

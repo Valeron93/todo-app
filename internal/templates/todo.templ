@@ -1,0 +1,30 @@
+package templates
+
+import "fmt"
+import "github.com/Valeron93/todo-app/internal/model"
+
+templ todoForm() {
+	<form
+		class="form todo-form"
+		hx-post="/api/todo"
+		hx-target="#todo-list"
+		hx-swap="beforeend"
+		hx-on::after-request="if (event.detail.successful) this.reset()"
+	>
+		<input type="text" name="todo-action" placeholder="Enter your todo" required/>
+		<input type="submit" value="Add"/>
+	</form>
+}
+
+templ TodoItem(item model.Todo) {
+	<div class="todo-item">
+		<h2>{ item.Action }</h2>
+		<button
+			hx-delete={ fmt.Sprintf("/api/todo/%v", item.Id) }
+			hx-target="closest .todo-item"
+			hx-swap="outerHTML"
+		>
+			Delete
+		</button>
+	</div>
+}

@@ -1,0 +1,24 @@
+package templates
+
+import "github.com/Valeron93/todo-app/internal/model"
+
+templ indexPage(user model.User, todos []model.Todo) {
+	<section class="card">
+		<div class="header">
+			<p class="user">Logged in as { user.Username }</p>
+			<form action="/api/logout" method="post">
+				<input type="submit" value="Logout"/>
+			</form>
+		</div>
+		@todoForm()
+		<div id="todo-list" class="todo-list">
+			for _, todo := range todos {
+				@TodoItem(todo)
+			}
+		</div>
+	</section>
+}
+
+templ Index(user model.User, todos []model.Todo) {
+	@layout("Todo App", indexPage(user, todos))
+}

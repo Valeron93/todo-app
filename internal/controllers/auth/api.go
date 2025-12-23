@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/Valeron93/todo-app/internal/model"
+	"github.com/Valeron93/todo-app/internal/templates"
 )
 
 type AuthController struct {
@@ -72,9 +73,18 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 	// TODO: validate form
 	username := r.FormValue("username")
 	password := r.FormValue("password")
+	confirmPassword := r.FormValue("confirmPassword")
 
-	if username == "" || password == "" {
-		http.Error(w, "username or password is invalid", http.StatusBadRequest)
+	if username == "" || password == "" || password != confirmPassword {
+		err := templates.RegisterForm(templates.AuthFormData{
+			Username:        username,
+			Password:        password,
+			ConfirmPassword: confirmPassword,
+			Error:           "Username or password is invalid",
+		}).Render(r.Context(), w)
+		if err != nil {
+			log.Print(err)
+		}
 		return
 	}
 

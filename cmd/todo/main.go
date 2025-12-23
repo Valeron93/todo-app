@@ -5,11 +5,12 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Valeron93/todo-app/internal/assets"
 	"github.com/Valeron93/todo-app/internal/controllers/auth"
 	"github.com/Valeron93/todo-app/internal/controllers/todo"
 	"github.com/Valeron93/todo-app/internal/migrations"
 	"github.com/Valeron93/todo-app/internal/model"
-	"github.com/Valeron93/todo-app/internal/view"
+	"github.com/Valeron93/todo-app/internal/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/mattn/go-sqlite3"
@@ -30,7 +31,7 @@ func main() {
 	todoRepo := model.NewTodoRepoSql(db)
 	authController := auth.New(model.NewUserRepoSql(db), model.NewSessionManagerSql(db))
 	todoController := todo.New(todoRepo)
-	views := view.NewViewHandler(todoRepo)
+	views := views.NewViewHandler(todoRepo)
 
 	r := chi.NewRouter()
 
@@ -46,7 +47,7 @@ func main() {
 	r.Get("/register", views.HandleRegisterPage)
 	r.Get("/login", views.HandleLoginPage)
 
-	r.Handle("/static/*", view.StaticHandler)
+	r.Handle("/static/*", assets.StaticHandler)
 
 	// protected pages
 	r.Group(func(r chi.Router) {

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/Valeron93/todo-app/internal/model"
-	"github.com/Valeron93/todo-app/internal/view"
+	"github.com/Valeron93/todo-app/internal/templates"
 )
 
 func (a *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) {
@@ -32,10 +32,9 @@ func (a *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) 
 		log.Print(err)
 		return
 	}
-	if err := view.RenderPartial(w, "todo-item", todo); err != nil {
+	if err := templates.TodoItem(todo).Render(r.Context(), w); err != nil {
 		log.Print(err)
 	}
-
 }
 
 func (a *TodoController) HandleDeleteTodo(w http.ResponseWriter, r *http.Request) {

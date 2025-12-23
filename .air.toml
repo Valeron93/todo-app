@@ -7,15 +7,21 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   bin = "./tmp/todo"
-  cmd = "go build -o ./tmp/todo ./cmd/todo"
+  cmd = "go tool templ generate && go build -o ./tmp/todo ./cmd/todo"
   delay = 50
   entrypoint = ["./tmp/todo"]
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   include_dir = ["cmd", "internal"]
-  include_ext = ["go", "tpl", "tmpl", "html", "css"]
+  include_ext = ["go", "html", "css", "templ"]
+  exclude_regex= [".*_templ.go"]
 
 [log]
   main_only = true
 
 [misc]
   clean_on_exit = false
+
+[proxy]
+  enabled = true
+  proxy_port = 3001
+  app_port = 3000
