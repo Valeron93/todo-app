@@ -8,11 +8,15 @@ type AuthFormData struct {
 }
 
 templ Login() {
-	@layout("Login", LoginForm(AuthFormData{}))
+	@layout("Login") {
+		@LoginForm(AuthFormData{})
+	}
 }
 
 templ Register() {
-	@layout("Register", RegisterForm(AuthFormData{}))
+	@layout("Register") {
+		@RegisterForm(AuthFormData{})
+	}
 }
 
 templ RegisterForm(data AuthFormData) {
