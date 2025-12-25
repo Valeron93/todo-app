@@ -6,13 +6,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Valeron93/todo-app/internal/controllers/auth"
 	"github.com/Valeron93/todo-app/internal/model"
 	"github.com/Valeron93/todo-app/internal/templates"
 )
 
 func (a *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) {
 
-	user := r.Context().Value("user").(model.User)
+	user := r.Context().Value(auth.UserKey{}).(model.User)
 
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)

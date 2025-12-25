@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Valeron93/todo-app/internal/controllers/auth"
 	"github.com/Valeron93/todo-app/internal/model"
 	"github.com/Valeron93/todo-app/internal/templates"
 )
@@ -19,7 +20,7 @@ func NewViewHandler(todoRepo model.TodoRepo) *ViewHandler {
 }
 
 func (h *ViewHandler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(model.User)
+	user := r.Context().Value(auth.UserKey{}).(model.User)
 	todos, err := h.todoRepo.GetAllForUser(user.Id)
 
 	if err != nil {

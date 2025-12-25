@@ -22,7 +22,11 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("ERROR: failed to close db: %v", err)
+		}
+	}()
 
 	if err := migrations.RunMigrations(db); err != nil {
 		log.Panic(err)

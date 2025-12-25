@@ -15,6 +15,8 @@ type AuthController struct {
 	sessions model.SessionManager
 }
 
+type UserKey struct{}
+
 func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
 	return &AuthController{
 		users:    users,
@@ -25,7 +27,7 @@ func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
 func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		_, ok := r.Context().Value("user").(model.User)
+		_, ok := r.Context().Value(UserKey{}).(model.User)
 
 		if !ok {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -39,7 +41,7 @@ func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
 func (c *AuthController) AuthRedirectMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		_, ok := r.Context().Value("user").(model.User)
+		_, ok := r.Context().Value(UserKey{}).(model.User)
 
 		if !ok {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -56,7 +58,7 @@ func (c *AuthController) InjectSessionMiddleware(next http.Handler) http.Handler
 
 		if sessionCookie, err := r.Cookie("session_token"); err == nil {
 			if user, err := c.sessions.GetUser(sessionCookie.Value); err == nil {
-				ctx = context.WithValue(r.Context(), "user", user)
+				ctx = context.WithValue(r.Context(), UserKey{}, user)
 			}
 		}
 
