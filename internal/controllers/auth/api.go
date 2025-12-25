@@ -15,7 +15,7 @@ type AuthController struct {
 	sessions model.SessionManager
 }
 
-type UserKey struct{}
+type SessionKey struct{}
 
 func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
 	return &AuthController{
@@ -27,7 +27,7 @@ func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
 func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		_, ok := r.Context().Value(UserKey{}).(model.User)
+		_, ok := r.Context().Value(SessionKey{}).(model.Session)
 
 		if !ok {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
@@ -41,7 +41,7 @@ func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
 func (c *AuthController) AuthRedirectMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		_, ok := r.Context().Value(UserKey{}).(model.User)
+		_, ok := r.Context().Value(SessionKey{}).(model.Session)
 
 		if !ok {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -57,8 +57,8 @@ func (c *AuthController) InjectSessionMiddleware(next http.Handler) http.Handler
 		ctx := r.Context()
 
 		if sessionCookie, err := r.Cookie("session_token"); err == nil {
-			if user, err := c.sessions.GetUser(sessionCookie.Value); err == nil {
-				ctx = context.WithValue(r.Context(), UserKey{}, user)
+			if session, err := c.sessions.GetSession(sessionCookie.Value); err == nil {
+				ctx = context.WithValue(r.Context(), SessionKey{}, session)
 			}
 		}
 
@@ -158,6 +158,8 @@ func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
+	session := r.Context().Value(SessionKey{}).(model.Session)
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    "",
@@ -165,6 +167,10 @@ func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 	})
+
+	if err := c.sessions.RevokeSession(session.Token); err != nil {
+		log.Printf("failed to revoke session: %v", err)
+	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 

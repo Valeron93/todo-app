@@ -20,15 +20,15 @@ func NewViewHandler(todoRepo model.TodoRepo) *ViewHandler {
 }
 
 func (h *ViewHandler) HandleIndexPage(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value(auth.UserKey{}).(model.User)
-	todos, err := h.todoRepo.GetAllForUser(user.Id)
+	session := r.Context().Value(auth.SessionKey{}).(model.Session)
+	todos, err := h.todoRepo.GetAllForUser(session.User.Id)
 
 	if err != nil {
 		http.Error(w, "database error", http.StatusInternalServerError)
 		return
 	}
 
-	if err := templates.Index(user, todos).Render(r.Context(), w); err != nil {
+	if err := templates.Index(session.User, todos).Render(r.Context(), w); err != nil {
 		log.Println(err)
 	}
 }

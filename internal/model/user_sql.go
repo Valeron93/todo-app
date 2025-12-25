@@ -114,6 +114,22 @@ func (s *sessionManagerSql) CreateSession(userId int64) (string, error) {
 	return token, nil
 }
 
+func (s *sessionManagerSql) GetSession(token string) (Session, error) {
+
+	var session Session
+	err := s.db.QueryRow(
+		`SELECT
+			sessions.token,
+    	 	users.id,
+    		users.username
+		 FROM sessions
+		 JOIN users ON sessions.user_id = users.id
+		 WHERE sessions.token = ?`,
+		token,
+	).Scan(&session.Token, &session.User.Id, &session.User.Username)
+	return session, err
+}
+
 // GetUser implements [SessionManager].
 func (s *sessionManagerSql) GetUser(token string) (User, error) {
 
@@ -132,6 +148,21 @@ func (s *sessionManagerSql) GetUser(token string) (User, error) {
 
 // RevokeSession implements [SessionManager].
 func (s *sessionManagerSql) RevokeSession(token string) error {
-	//TODO: revoke session
+
+	result, err := s.db.Exec(`DELETE FROM sessions WHERE token = ?`, token)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrNoRecord
+	}
+
 	return nil
 }

@@ -13,7 +13,7 @@ import (
 
 func (a *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) {
 
-	user := r.Context().Value(auth.UserKey{}).(model.User)
+	session := r.Context().Value(auth.SessionKey{}).(model.Session)
 
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
@@ -27,7 +27,7 @@ func (a *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	todo, err := a.todoRepo.CreateForUser(user.Id, action)
+	todo, err := a.todoRepo.CreateForUser(session.User.Id, action)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		log.Print(err)
