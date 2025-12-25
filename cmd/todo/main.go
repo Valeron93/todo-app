@@ -13,7 +13,7 @@ import (
 	"github.com/Valeron93/todo-app/internal/views"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 )
 
 func main() {
@@ -66,7 +66,6 @@ func main() {
 
 	const addr = ":3000"
 	log.Print("listening on " + addr)
-
 	if err := http.ListenAndServe(":3000", r); err != nil {
 		log.Panic(err)
 	}
