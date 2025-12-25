@@ -101,6 +101,10 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 
 	token, err := c.sessions.CreateSession(user.Id)
 
+	if err != nil {
+		http.Error(w, "internal server error: failed to create session", http.StatusInternalServerError)
+	}
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    token,
