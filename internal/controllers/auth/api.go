@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"context"
 	"errors"
 	"log"
 	"net/http"
@@ -15,55 +14,11 @@ type AuthController struct {
 	sessions model.SessionManager
 }
 
-type SessionKey struct{}
-
 func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
 	return &AuthController{
 		users:    users,
 		sessions: sessions,
 	}
-}
-
-func (c *AuthController) AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		_, ok := r.Context().Value(SessionKey{}).(model.Session)
-
-		if !ok {
-			http.Error(w, "unauthorized", http.StatusUnauthorized)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (c *AuthController) AuthRedirectMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		_, ok := r.Context().Value(SessionKey{}).(model.Session)
-
-		if !ok {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func (c *AuthController) InjectSessionMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-
-		if sessionCookie, err := r.Cookie("session_token"); err == nil {
-			if session, err := c.sessions.GetSession(sessionCookie.Value); err == nil {
-				ctx = context.WithValue(r.Context(), SessionKey{}, session)
-			}
-		}
-
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
 }
 
 func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +45,7 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err := c.users.RegisterUser(username, password)
+	user, err := c.users.RegisterUser(username, password, confirmPassword)
 
 	if err != nil {
 		if errors.Is(err, model.ErrUserAlreadyExists) {
@@ -158,7 +113,7 @@ func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {
 
-	session := r.Context().Value(SessionKey{}).(model.Session)
+	session := model.SessionFromCtxMust(r.Context())
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",

@@ -8,11 +8,12 @@ import (
 	"github.com/Valeron93/todo-app/internal/assets"
 	"github.com/Valeron93/todo-app/internal/controllers/auth"
 	"github.com/Valeron93/todo-app/internal/controllers/todo"
+	"github.com/Valeron93/todo-app/internal/middleware"
 	"github.com/Valeron93/todo-app/internal/migrations"
 	"github.com/Valeron93/todo-app/internal/model"
 	"github.com/Valeron93/todo-app/internal/views"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	_ "modernc.org/sqlite"
 )
 
@@ -33,17 +34,22 @@ func main() {
 	}
 
 	todoRepo := model.NewTodoRepoSql(db)
-	authController := auth.New(model.NewUserRepoSql(db), model.NewSessionManagerSql(db))
+	userRepo := model.NewUserRepoSql(db)
+	sessionRepo := model.NewSessionManagerSql(db)
+
+	authController := auth.New(userRepo, sessionRepo)
 	todoController := todo.New(todoRepo)
 	views := views.NewViewHandler(todoRepo)
 
+	authMiddleware := middleware.NewAuthMiddleware(sessionRepo)
+
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Recoverer)
+	r.Use(chiMiddleware.Logger)
+	r.Use(chiMiddleware.RealIP)
+	r.Use(chiMiddleware.Recoverer)
 
-	r.Use(authController.InjectSessionMiddleware)
+	r.Use(authMiddleware.InjectSession)
 
 	r.Post("/api/register", authController.HandleRegister)
 	r.Post("/api/login", authController.HandleLogin)
@@ -55,13 +61,13 @@ func main() {
 
 	// protected pages
 	r.Group(func(r chi.Router) {
-		r.Use(authController.AuthRedirectMiddleware)
+		r.Use(authMiddleware.UnauthorizedRedirect("/login"))
 		r.Get("/", views.HandleIndexPage)
 	})
 
 	// protected API endpoints
 	r.Group(func(r chi.Router) {
-		r.Use(authController.AuthMiddleware)
+		r.Use(authMiddleware.Unauthorized401)
 
 		r.Post("/api/todo", todoController.HandlePostTodo)
 		r.Delete("/api/todo/{id}", todoController.HandleDeleteTodo)

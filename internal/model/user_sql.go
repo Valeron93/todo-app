@@ -73,6 +73,7 @@ func (u *userRepoSql) Login(username string, password string) (User, error) {
 }
 
 func (u *userRepoSql) RegisterUser(username string, password string) (User, error) {
+	// TODO: validate username and password
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
