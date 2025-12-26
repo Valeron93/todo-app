@@ -27,11 +27,11 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// TODO: validate form
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	confirmPassword := r.FormValue("confirmPassword")
 
+	// TODO: move this validation into model package
 	if username == "" || password == "" || password != confirmPassword {
 		err := templates.RegisterForm(templates.AuthFormData{
 			Username:        username,
