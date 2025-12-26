@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Valeron93/todo-app/internal/model"
-	templates "github.com/Valeron93/todo-app/internal/view"
+	"github.com/Valeron93/todo-app/internal/view"
 )
 
 type AuthController struct {
@@ -15,13 +15,13 @@ type AuthController struct {
 }
 
 func (c *AuthController) HandleRegisterPage(w http.ResponseWriter, r *http.Request) {
-	if err := templates.Register().Render(r.Context(), w); err != nil {
+	if err := view.Register().Render(r.Context(), w); err != nil {
 		log.Println(err)
 	}
 
 }
 func (c *AuthController) HandleLoginPage(w http.ResponseWriter, r *http.Request) {
-	if err := templates.Login().Render(r.Context(), w); err != nil {
+	if err := view.Login().Render(r.Context(), w); err != nil {
 		log.Println(err)
 	}
 }
@@ -45,7 +45,7 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 
 	// TODO: move this validation into model package
 	if username == "" || password == "" || password != confirmPassword {
-		err := templates.RegisterForm(templates.AuthFormData{
+		err := view.RegisterForm(view.AuthFormData{
 			Username:        username,
 			Password:        password,
 			ConfirmPassword: confirmPassword,
