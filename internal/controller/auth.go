@@ -1,4 +1,4 @@
-package auth
+package controller
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Valeron93/todo-app/internal/model"
-	"github.com/Valeron93/todo-app/internal/templates"
+	templates "github.com/Valeron93/todo-app/internal/view"
 )
 
 type AuthController struct {
@@ -14,7 +14,19 @@ type AuthController struct {
 	sessions model.SessionManager
 }
 
-func New(users model.UserRepo, sessions model.SessionManager) *AuthController {
+func (c *AuthController) HandleRegisterPage(w http.ResponseWriter, r *http.Request) {
+	if err := templates.Register().Render(r.Context(), w); err != nil {
+		log.Println(err)
+	}
+
+}
+func (c *AuthController) HandleLoginPage(w http.ResponseWriter, r *http.Request) {
+	if err := templates.Login().Render(r.Context(), w); err != nil {
+		log.Println(err)
+	}
+}
+
+func NewAuth(users model.UserRepo, sessions model.SessionManager) *AuthController {
 	return &AuthController{
 		users:    users,
 		sessions: sessions,

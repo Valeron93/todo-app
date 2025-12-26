@@ -6,12 +6,10 @@ import (
 	"net/http"
 
 	"github.com/Valeron93/todo-app/internal/assets"
-	"github.com/Valeron93/todo-app/internal/controllers/auth"
-	"github.com/Valeron93/todo-app/internal/controllers/todo"
+	"github.com/Valeron93/todo-app/internal/controller"
 	"github.com/Valeron93/todo-app/internal/middleware"
 	"github.com/Valeron93/todo-app/internal/migrations"
 	"github.com/Valeron93/todo-app/internal/model"
-	"github.com/Valeron93/todo-app/internal/views"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	_ "modernc.org/sqlite"
@@ -37,10 +35,8 @@ func main() {
 	userRepo := model.NewUserRepoSql(db)
 	sessionRepo := model.NewSessionManagerSql(db)
 
-	authController := auth.New(userRepo, sessionRepo)
-	todoController := todo.New(todoRepo)
-	views := views.NewViewHandler(todoRepo)
-
+	authController := controller.NewAuth(userRepo, sessionRepo)
+	todoController := controller.NewTodo(todoRepo)
 	authMiddleware := middleware.NewAuthMiddleware(sessionRepo)
 
 	r := chi.NewRouter()
@@ -54,15 +50,15 @@ func main() {
 	r.Post("/api/register", authController.HandleRegister)
 	r.Post("/api/login", authController.HandleLogin)
 
-	r.Get("/register", views.HandleRegisterPage)
-	r.Get("/login", views.HandleLoginPage)
+	r.Get("/register", authController.HandleRegisterPage)
+	r.Get("/login", authController.HandleLoginPage)
 
 	r.Handle("/static/*", assets.StaticHandler)
 
 	// protected pages
 	r.Group(func(r chi.Router) {
 		r.Use(authMiddleware.UnauthorizedRedirect("/login"))
-		r.Get("/", views.HandleIndexPage)
+		r.Get("/", todoController.HandleTodoListPage)
 	})
 
 	// protected API endpoints

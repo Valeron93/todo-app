@@ -1,7 +1,7 @@
 # TODOs:
 
 - [ ] Architecure:
-    - [ ] Fully separate Views and Controllers
+    - [x] Fully separate Views and Controllers
   
 - [ ] UI:
     - [ ] Use HTMX for every request to avoid full-page reloads
