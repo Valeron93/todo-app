@@ -45,7 +45,7 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	user, err := c.users.RegisterUser(username, password, confirmPassword)
+	user, err := c.users.RegisterUser(username, password)
 
 	if err != nil {
 		if errors.Is(err, model.ErrUserAlreadyExists) {
