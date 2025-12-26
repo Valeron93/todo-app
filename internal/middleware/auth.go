@@ -16,6 +16,8 @@ func NewAuthMiddleware(sessionManager model.SessionManager) AuthMiddleware {
 	}
 }
 
+type MiddlewareFunc func(next http.Handler) http.Handler
+
 func (a *AuthMiddleware) Unauthorized401(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -30,13 +32,31 @@ func (a *AuthMiddleware) Unauthorized401(next http.Handler) http.Handler {
 	})
 }
 
-func (a *AuthMiddleware) UnauthorizedRedirect(url string) func(next http.Handler) http.Handler {
+// TODO: maybe redirect using HTMX HX-Redirect header?
+
+func (a *AuthMiddleware) UnauthorizedRedirect(url string) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			_, ok := model.SessionFromCtx(r.Context())
 
 			if !ok {
+				http.Redirect(w, r, url, http.StatusSeeOther)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func (a *AuthMiddleware) AuthorizedRedirect(url string) MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			_, ok := model.SessionFromCtx(r.Context())
+
+			if ok {
 				http.Redirect(w, r, url, http.StatusSeeOther)
 				return
 			}

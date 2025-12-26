@@ -47,13 +47,18 @@ func main() {
 
 	r.Use(authMiddleware.InjectSession)
 
-	r.Post("/api/register", authController.HandleRegister)
-	r.Post("/api/login", authController.HandleLogin)
-
-	r.Get("/register", authController.HandleRegisterPage)
-	r.Get("/login", authController.HandleLoginPage)
-
 	r.Handle("/static/*", assets.StaticHandler)
+
+	// pages only accessible to non-logged in users
+	r.Group(func(r chi.Router) {
+		r.Use(authMiddleware.AuthorizedRedirect("/"))
+
+		r.Post("/api/register", authController.HandleRegister)
+		r.Post("/api/login", authController.HandleLogin)
+
+		r.Get("/register", authController.HandleRegisterPage)
+		r.Get("/login", authController.HandleLoginPage)
+	})
 
 	// protected pages
 	r.Group(func(r chi.Router) {
