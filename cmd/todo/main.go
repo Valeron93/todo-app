@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/Valeron93/todo-app/internal/assets"
 	"github.com/Valeron93/todo-app/internal/controller"
@@ -15,12 +17,32 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func main() {
+func openDb() *sql.DB {
 
-	db, err := sql.Open("sqlite3", "./db.sqlite")
+	file := "./db.sqlite"
+
+	opts := []string{
+		"_foreign_keys=on",
+		"_journal_mode=WAL",
+		"_synchronous=NORMAL",
+		"_temp_store=MEMORY",
+		"_busy_timeout=5000",
+		"_mmap_size=268435456",
+	}
+
+	dsn := fmt.Sprintf("file:%s?%s", file, strings.Join(opts, "&"))
+
+	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		log.Panic(err)
 	}
+
+	return db
+}
+
+func main() {
+	db := openDb()
+
 	defer func() {
 		if err := db.Close(); err != nil {
 			log.Printf("ERROR: failed to close db: %v", err)

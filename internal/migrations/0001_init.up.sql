@@ -1,8 +1,8 @@
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username VARCHAR(64) UNIQUE NOT NULL,
-    hashed_password VARCHAR(255) NOT NULL
-);
+    username TEXT UNIQUE NOT NULL,
+    hashed_password BLOB NOT NULL
+) STRICT;
 
 CREATE TABLE todos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -10,11 +10,11 @@ CREATE TABLE todos (
     user_id INTEGER NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users(id)
-);
+) STRICT;
 
 CREATE TABLE sessions (
-    token VARCHAR(255) PRIMARY KEY UNIQUE NOT NULL,
+    token TEXT PRIMARY KEY UNIQUE NOT NULL,
     user_id INTEGER NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users(id)
-);
+) STRICT;

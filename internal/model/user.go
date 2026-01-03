@@ -7,7 +7,7 @@ import (
 type User struct {
 	Id             int64
 	Username       string
-	HashedPassword string
+	HashedPassword []byte
 }
 
 type Session struct {
