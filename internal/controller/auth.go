@@ -66,6 +66,7 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 		}
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		log.Print(err)
+		return
 	}
 
 	token, err := c.sessions.CreateSession(user.Id)
