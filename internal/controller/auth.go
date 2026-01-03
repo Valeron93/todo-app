@@ -120,6 +120,7 @@ func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
+	w.Header().Add("HX-Redirect", "/")
 }
 
 func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {
