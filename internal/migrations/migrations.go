@@ -27,7 +27,7 @@ func RunMigrations(db *sql.DB) error {
 		return err
 	}
 
-	m, err := migrate.NewWithInstance("iofs", source, "sqlite3", driver)
+	m, err := migrate.NewWithInstance("iofs", source, "sqlite", driver)
 	if err != nil {
 		return err
 	}

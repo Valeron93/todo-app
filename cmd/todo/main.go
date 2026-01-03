@@ -32,7 +32,7 @@ func openDb() *sql.DB {
 
 	dsn := fmt.Sprintf("file:%s?%s", file, strings.Join(opts, "&"))
 
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		log.Panic(err)
 	}
