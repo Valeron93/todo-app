@@ -44,21 +44,28 @@ func (c *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	action := strings.TrimSpace(r.FormValue("todo-action"))
+	originalAction := r.FormValue("todo-action")
+	action := strings.TrimSpace(originalAction)
 
 	// TODO: move this validation in model package
 	if action == "" {
-		http.Error(w, "empty todo", http.StatusBadRequest)
+		view.TodoForm(originalAction, "Item cannot be empty").Render(r.Context(), w)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	todo, err := c.todoRepo.CreateForUser(session.User.Id, action)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		view.TodoForm(originalAction, "Internal server error").Render(r.Context(), w)
+		w.WriteHeader(http.StatusBadRequest)
 		log.Print(err)
 		return
 	}
-	if err := view.TodoItem(todo).Render(r.Context(), w); err != nil {
+	if err := view.TodoForm("", "").Render(r.Context(), w); err != nil {
+		log.Print(err)
+	}
+
+	if err := view.TodoItemOutOfBand(todo).Render(r.Context(), w); err != nil {
 		log.Print(err)
 	}
 }

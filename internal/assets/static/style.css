@@ -4,6 +4,7 @@
     --card: #ffffff;
     --border: #dddddd;
     --accent: #4f46e5;
+    --error: rgb(233, 58, 10);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -104,4 +105,8 @@ button {
 }
 .link:hover {
     text-decoration: underline;
+}
+
+.error-container {
+    color: var(--error);
 }

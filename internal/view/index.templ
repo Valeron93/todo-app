@@ -11,12 +11,8 @@ templ Index(user model.User, todos []model.Todo) {
 					<input type="submit" value="Logout"/>
 				</form>
 			</div>
-			@todoForm()
-			<div id="todo-list" class="todo-list">
-				for _, todo := range todos {
-					@TodoItem(todo)
-				}
-			</div>
+			@TodoForm("", "")
+			@TodoTable(todos)
 		</section>
 	}
 }
