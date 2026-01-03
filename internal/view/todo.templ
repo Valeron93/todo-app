@@ -9,7 +9,7 @@ templ TodoForm(text string, err string) {
 		hx-post="/api/todo"
 		hx-swap="outerHTML"
 	>
-		<input type="text" name="todo-action" placeholder="Enter your todo" value={ text } required/>
+		<input type="text" name="todo-action" placeholder="Enter your todo" value={ text } autocomplete="off" required autofocus/>
 		<input type="submit" value="Add"/>
 		@ErrorContainer(err)
 	</form>
