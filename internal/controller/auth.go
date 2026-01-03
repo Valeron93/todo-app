@@ -81,7 +81,7 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	w.Header().Add("HX-Redirect", "/")
 }
 
 func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -120,7 +120,6 @@ func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	w.Header().Add("HX-Redirect", "/")
 }
 
 func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {
