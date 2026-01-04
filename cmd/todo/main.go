@@ -1,11 +1,10 @@
 package main
 
 import (
+	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/Valeron93/todo-app/internal/assets"
 	"github.com/Valeron93/todo-app/internal/controller"
@@ -14,25 +13,30 @@ import (
 	"github.com/Valeron93/todo-app/internal/model"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
-	_ "modernc.org/sqlite"
+	"modernc.org/sqlite"
 )
+
+func init() {
+	// SQLite settings
+	sqlite.RegisterConnectionHook(func(conn sqlite.ExecQuerierContext, dsn string) error {
+		query := `
+		PRAGMA foreign_keys = ON;
+		PRAGMA journal_mode = WAL;
+		PRAGMA synchronous = NORMAL;
+		PRAGMA temp_store = MEMORY;
+		PRAGMA busy_timeout = 5000;
+		PRAGMA mmap_size = 268435456;
+		`
+		_, err := conn.ExecContext(context.Background(), query, nil)
+		return err
+	})
+}
 
 func openDb() *sql.DB {
 
 	file := "./db.sqlite"
 
-	opts := []string{
-		"_foreign_keys=on",
-		"_journal_mode=WAL",
-		"_synchronous=NORMAL",
-		"_temp_store=MEMORY",
-		"_busy_timeout=5000",
-		"_mmap_size=268435456",
-	}
-
-	dsn := fmt.Sprintf("file:%s?%s", file, strings.Join(opts, "&"))
-
-	db, err := sql.Open("sqlite", dsn)
+	db, err := sql.Open("sqlite", file)
 	if err != nil {
 		log.Panic(err)
 	}
