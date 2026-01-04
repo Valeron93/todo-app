@@ -83,4 +83,6 @@ func (c *TodoController) HandleDeleteTodo(w http.ResponseWriter, r *http.Request
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 }
