@@ -206,6 +206,7 @@ button:hover {
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--fg);
+    overflow-wrap: break-word;
 }
 
 .todo-item button {
