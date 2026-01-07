@@ -26,6 +26,7 @@ func (c *TodoController) HandleTodoListPage(w http.ResponseWriter, r *http.Reque
 	todos, err := c.todoRepo.GetAllForUser(session.User.Id)
 
 	if err != nil {
+		log.Printf("ERROR: getting todos: %v", err)
 		http.Error(w, "database error", http.StatusInternalServerError)
 		return
 	}
@@ -70,7 +71,9 @@ func (c *TodoController) HandlePostTodo(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (c *TodoController) HandleDeleteTodo(w http.ResponseWriter, r *http.Request) {
+func (c *TodoController) HandleToggleDone(w http.ResponseWriter, r *http.Request) {
+	session := model.SessionFromCtxMust(r.Context())
+
 	idParam := r.PathValue("id")
 
 	id, err := strconv.ParseInt(idParam, 10, 64)
@@ -79,7 +82,42 @@ func (c *TodoController) HandleDeleteTodo(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := c.todoRepo.Delete(id); err != nil {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	doneStr := r.FormValue("done")
+	done, err := strconv.ParseBool(doneStr)
+	if err != nil {
+		http.Error(w, "invalid done value", http.StatusBadRequest)
+		return
+	}
+
+	// Set the done state
+	updatedTodo, err := c.todoRepo.SetDoneForUser(session.User.Id, id, done)
+	if err != nil {
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := view.TodoItem(updatedTodo).Render(r.Context(), w); err != nil {
+		log.Print(err)
+	}
+}
+
+func (c *TodoController) HandleDeleteTodo(w http.ResponseWriter, r *http.Request) {
+	session := model.SessionFromCtxMust(r.Context())
+
+	idParam := r.PathValue("id")
+
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid path parameter", http.StatusBadRequest)
+		return
+	}
+
+	if err := c.todoRepo.DeleteForUser(session.User.Id, id); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}

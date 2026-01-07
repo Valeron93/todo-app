@@ -97,6 +97,7 @@ func main() {
 		r.Use(authMiddleware.Unauthorized401)
 
 		r.Post("/api/todo", todoController.HandlePostTodo)
+		r.Patch("/api/todo/{id}/done", todoController.HandleToggleDone)
 		r.Delete("/api/todo/{id}", todoController.HandleDeleteTodo)
 		r.Post("/api/logout", authController.HandleLogout)
 	})

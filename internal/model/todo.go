@@ -9,12 +9,14 @@ type Todo struct {
 	Id     int64
 	Action string
 	UserId int64
+	Done   bool
 }
 
 type TodoRepo interface {
 	GetAllForUser(userId int64) ([]Todo, error)
 	CreateForUser(userId int64, action string) (Todo, error)
-	Delete(id int64) error
+	SetDoneForUser(userId, id int64, done bool) (Todo, error)
+	DeleteForUser(userId, id int64) error
 }
 
 type todoRepoSql struct {
@@ -32,11 +34,11 @@ func (t *todoRepoSql) CreateForUser(userId int64, action string) (Todo, error) {
 	var newTodo Todo
 
 	err := t.db.QueryRow(
-		`INSERT INTO todos (action, user_id) 
-		 VALUES (?, ?) 
-		 RETURNING id, action, user_id`,
+		`INSERT INTO todos (action, user_id, done)
+		 VALUES (?, ?, FALSE)
+		 RETURNING id, action, user_id, done`,
 		action, userId,
-	).Scan(&newTodo.Id, &newTodo.Action, &newTodo.UserId)
+	).Scan(&newTodo.Id, &newTodo.Action, &newTodo.UserId, &newTodo.Done)
 	if err != nil {
 		return Todo{}, err
 	}
@@ -46,7 +48,7 @@ func (t *todoRepoSql) CreateForUser(userId int64, action string) (Todo, error) {
 func (t *todoRepoSql) GetAllForUser(userId int64) ([]Todo, error) {
 	result := []Todo{}
 	rows, err := t.db.Query(`
-		SELECT id, action FROM todos WHERE user_id = ?
+		SELECT id, action, done FROM todos WHERE user_id = ?
 	`, userId)
 
 	if err != nil {
@@ -57,7 +59,7 @@ func (t *todoRepoSql) GetAllForUser(userId int64) ([]Todo, error) {
 
 	for rows.Next() {
 		var todo Todo
-		if err := rows.Scan(&todo.Id, &todo.Action); err != nil {
+		if err := rows.Scan(&todo.Id, &todo.Action, &todo.Done); err != nil {
 			return nil, err
 		}
 		result = append(result, todo)
@@ -65,9 +67,23 @@ func (t *todoRepoSql) GetAllForUser(userId int64) ([]Todo, error) {
 	return result, nil
 }
 
-func (t *todoRepoSql) Delete(id int64) error {
+func (t *todoRepoSql) SetDoneForUser(userId, id int64, done bool) (Todo, error) {
+	var todo Todo
+	err := t.db.QueryRow(`
+		UPDATE todos SET done = ? WHERE id = ? AND user_id = ?
+		RETURNING id, action, done, user_id
+	`, done, id, userId).Scan(&todo.Id, &todo.Action, &todo.Done, &todo.UserId)
 
-	result, err := t.db.Exec(`DELETE FROM todos WHERE id = ?`, id)
+	if err != nil {
+		return Todo{}, err
+	}
+
+	return todo, nil
+}
+
+func (t *todoRepoSql) DeleteForUser(userId, id int64) error {
+
+	result, err := t.db.Exec(`DELETE FROM todos WHERE id = ? AND user_id = ?`, id, userId)
 
 	if err != nil {
 		return err

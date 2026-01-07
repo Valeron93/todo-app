@@ -201,12 +201,54 @@ button:hover {
     border-bottom: none;
 }
 
-.todo-item h2 {
+.todo-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    background: var(--card);
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    margin-right: var(--spacing-sm);
+    background-size: 12px 12px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.todo-item input[type="checkbox"]:hover {
+    border-color: var(--accent);
+    background: rgba(0, 123, 255, 0.05);
+}
+
+.todo-item input[type="checkbox"]:checked {
+    background-color: var(--success);
+    border-color: var(--success);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m4.5 12.75 6 6 9-13.5' /%3E%3C/svg%3E");
+    animation: checkPulse 0.3s ease;
+}
+
+@keyframes checkPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.todo-item .todo-text {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--fg);
     overflow-wrap: break-word;
+    flex: 1;
+}
+
+.todo-item .todo-text.done {
+    text-decoration: line-through;
+    color: var(--secondary);
 }
 
 .todo-item button {
