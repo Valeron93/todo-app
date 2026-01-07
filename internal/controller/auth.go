@@ -42,18 +42,23 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	confirmPassword := r.FormValue("confirmPassword")
+	authData := view.AuthFormData{
+		Username:        username,
+		Password:        password,
+		ConfirmPassword: confirmPassword,
+	}
+
+	defer func() {
+		if authData.Error != "" {
+			if err := view.RegisterForm(authData).Render(r.Context(), w); err != nil {
+				log.Print(err)
+			}
+		}
+	}()
 
 	// TODO: move this validation into model package
 	if username == "" || password == "" || password != confirmPassword {
-		err := view.RegisterForm(view.AuthFormData{
-			Username:        username,
-			Password:        password,
-			ConfirmPassword: confirmPassword,
-			Error:           "Username or password is invalid",
-		}).Render(r.Context(), w)
-		if err != nil {
-			log.Print(err)
-		}
+		authData.Error = "Username or password is invalid"
 		return
 	}
 
@@ -61,28 +66,23 @@ func (c *AuthController) HandleRegister(w http.ResponseWriter, r *http.Request) 
 
 	if err != nil {
 		if errors.Is(err, model.ErrUserAlreadyExists) {
-			http.Error(w, "user already exists", http.StatusConflict)
-			return
+			authData.Error = "User with this username already exists"
+		} else {
+			log.Print(err)
+			authData.Error = "Registration failed. Please try again."
 		}
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		log.Print(err)
 		return
 	}
 
 	token, err := c.sessions.CreateSession(user.Id)
 
 	if err != nil {
-		http.Error(w, "internal server error: failed to create session", http.StatusInternalServerError)
+		log.Print(err)
+		authData.Error = "Registration failed. Please try again."
+		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-	})
-
-	w.Header().Add("HX-Redirect", "/")
+	c.completeAuth(w, token)
 }
 
 func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -95,33 +95,38 @@ func (c *AuthController) HandleLogin(w http.ResponseWriter, r *http.Request) {
 	// TODO: validate form
 	username := r.FormValue("username")
 	password := r.FormValue("password")
+	authData := view.AuthFormData{
+		Username: username,
+		Password: password,
+	}
+
+	defer func() {
+		if authData.Error != "" {
+			if err := view.LoginForm(authData).Render(r.Context(), w); err != nil {
+				log.Print(err)
+			}
+		}
+	}()
 
 	user, err := c.users.Login(username, password)
 	if err != nil {
 		if errors.Is(err, model.ErrInvalidCredentials) {
-			http.Error(w, "invalid credentials", http.StatusUnauthorized)
-			return
+			authData.Error = "Invalid username or password"
+		} else {
+			log.Print(err)
+			authData.Error = "Login failed. Please try again."
 		}
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		log.Print(err)
 		return
 	}
 
 	token, err := c.sessions.CreateSession(user.Id)
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
 		log.Print(err)
+		authData.Error = "Login failed. Please try again."
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-	})
-
-	w.Header().Add("HX-Redirect", "/")
+	c.completeAuth(w, token)
 }
 
 func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {
@@ -141,5 +146,15 @@ func (c *AuthController) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
 
+func (c *AuthController) completeAuth(w http.ResponseWriter, token string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+	})
+
+	w.Header().Add("HX-Redirect", "/")
 }
