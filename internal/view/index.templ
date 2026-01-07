@@ -2,15 +2,24 @@ package view
 
 import "github.com/Valeron93/todo-app/internal/model"
 
-templ Index(user model.User, todos []model.Todo) {
-	@layout("Todo App") {
-		<section class="card">
-			<div class="header">
+templ Navbar(user model.User) {
+	<nav class="navbar">
+		<div class="nav-content">
+			<h1 class="nav-title">Todo App</h1>
+			<div class="nav-profile">
 				<p class="user">Logged in as { user.Username }</p>
 				<form action="/api/logout" method="post">
 					<input type="submit" value="Logout"/>
 				</form>
 			</div>
+		</div>
+	</nav>
+}
+
+templ Index(user model.User, todos []model.Todo) {
+	@layout("Todo App", Navbar(user)) {
+		<section class="todos">
+			<h2>Your Todos</h2>
 			@TodoForm("", "")
 			@TodoTable(todos)
 		</section>

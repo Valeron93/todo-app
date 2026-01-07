@@ -8,19 +8,20 @@ type AuthFormData struct {
 }
 
 templ Login() {
-	@layout("Login") {
+	@layout("Login", nil) {
 		@LoginForm(AuthFormData{})
 	}
 }
 
 templ Register() {
-	@layout("Register") {
+	@layout("Register", nil) {
 		@RegisterForm(AuthFormData{})
 	}
 }
 
 templ RegisterForm(data AuthFormData) {
 	<section class="card auth">
+		<h1>Register</h1>
 		<form class="form" hx-post="/api/register" hx-target="closest section" hx-swap="outerHTML" autocomplete="off">
 			<input type="text" name="username" placeholder="Username" value={ data.Username } autocomplete="off" required/>
 			<input type="password" name="password" placeholder="Password" value={ data.Password } autocomplete="off" required/>
@@ -34,6 +35,7 @@ templ RegisterForm(data AuthFormData) {
 
 templ LoginForm(data AuthFormData) {
 	<section class="card auth">
+		<h1>Login</h1>
 		<form class="form" hx-post="/api/login" hx-target="closest section" hx-swap="outerHTML">
 			<input type="text" name="username" placeholder="Username" autocomplete="username" value={ data.Username } required/>
 			<input type="password" name="password" placeholder="Password" autocomplete="current-password" value={ data.Password } required/>
